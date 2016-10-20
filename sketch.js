@@ -1,81 +1,42 @@
-var blobStartX = 400; 
-var blobStartY = 400;
 
-var socket = new WebSocket('ws://localhost:8081');
 var buttonVal = []; 
-var blobby_spriteSheet;
-var square_spriteSheet;
-var walk2_animation;
-var walk_animation;
-var bg; 
+var socket = new WebSocket('ws://localhost:8081');
+var numHugs; 
+var previousButtonVal=0; 
 
-var top = false; 
-var middle = false; 
-var right = false; 
-
+var blocks = []; 
 function preload(){
-  blobby_spriteSheet = loadSpriteSheet('assets/spritesheet.png', 93, 119, 5);
-  square_spriteSheet = loadSpriteSheet('assets/spritesheet2.png', 110.133, 112.19, 4);
-  
-  bg = loadImage("assets/background.png", 2000, height);
+ 
 }
 
 function setup() {
-  createCanvas(1000,500); 
-  
-  backgr = createSprite(500, 250); 
-  backgr.addImage(bg); 
-  
-  // mouseSprite = createSprite(0, 0, 50, 50); 
-  
-  playerSetup(); 
-  tileSetup(); 
-  
+  createCanvas(displayWidth,displayHeight); 
   socket.onopen = openSocket;
   socket.onmessage = showData;
+  
+
+  for(var i = 0; i<3; i++){
+    for(var j = 0; j<3; j++){
+      blocks[i] = createSprite((displayWidth*.5-300)+ i*150, j*150+75, 150, 150); 
+    }
+  }
+  
 }
 
 function draw() {
-  background(255); 
- 
-  
-  console.log(buttonVal[11]); 
-  
-  if(buttonVal[11]=== "4"){
-    solids[1].changeAnimation("starImage");
-  } else{
-    solids[1].changeAnimation("tileImage");
+  // background(255); 
+  if((buttonVal[9] - previousButtonVal) == 1){
+    console.log('this happened'); 
+    blocks[buttonVal[9]].remove();  
   }
   
-  if(buttonVal[10]=== "4"){
-    solids[0].changeAnimation("starImage");
-  } else{
-    solids[0].changeAnimation("tileImage");
-  }
   
-  if(buttonVal[8]=== "4"){
-    solids[2].changeAnimation("starImage");
-  } else{
-    solids[2].changeAnimation("tileImage");
-  }
-
-  
+  previousButtonVal = buttonVal[9];
+  console.log(buttonVal[9]); 
+  console.log(previousButtonVal); 
   drawSprites(); 
-  tileUpdate(); 
 }
 
-function playerSetup(){
-  blobby_spriteSheet = loadSpriteSheet('assets/spritesheet.png', 93, 119, 5);
-  square_spriteSheet = loadSpriteSheet('assets/spritesheet2.png', 110.133, 112.19, 4);
-
-  walk2_animation = loadAnimation(square_spriteSheet);
-  walk_animation = loadAnimation(blobby_spriteSheet);
-  
-  blob = createSprite(blobStartX , blobStartY); 
-  blob.setCollider("circle", 0, 0, 50); 
-  blob.addAnimation("resting", "assets/blob.png"); 
-  blob.addAnimation("walking", blobby_spriteSheet); 
-}
 
 function openSocket() {
   console.log('socket is open');
@@ -83,6 +44,7 @@ function openSocket() {
 
 function showData(result) {
   buttonVal = trim(result.data); //clear the whitespace and assign it to buttonVal
-  // console.log(buttonVal); //printing out the button data
+  // console.log(buttonVal); //printing out the button data\
+  
 }
 
