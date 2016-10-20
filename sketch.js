@@ -1,81 +1,102 @@
-var blobStartX = 400; 
-var blobStartY = 400;
 
-var socket = new WebSocket('ws://localhost:8081');
 var buttonVal = []; 
-var blobby_spriteSheet;
-var square_spriteSheet;
-var walk2_animation;
-var walk_animation;
-var bg; 
+var socket = new WebSocket('ws://localhost:8081');
+var numHugs; 
+var previousButtonVal; 
+var removeTile = false; 
+var solids = []; 
+var state =0; 
 
-var top = false; 
-var middle = false; 
-var right = false; 
+var character; 
+var characterSpriteSheet; 
+var walkingSpriteSheet; 
+
+var backgroundImg; 
+var brick; 
 
 function preload(){
-  blobby_spriteSheet = loadSpriteSheet('assets/spritesheet.png', 93, 119, 5);
-  square_spriteSheet = loadSpriteSheet('assets/spritesheet2.png', 110.133, 112.19, 4);
-  
-  bg = loadImage("assets/background.png", 2000, height);
+  characterSpriteSheet = loadSpriteSheet("assets/spriteSheet1.png", 192, 192, 3); 
+  walkingSpriteSheet = loadSpriteSheet("assets/spriteSheet2.png", 192, 192, 3); 
+
+  brick = loadImage("assets/brick-03.png", 140, 140); 
+  backgroundImg = loadImage("assets/wall.png", 1024, 768); 
 }
 
 function setup() {
-  createCanvas(1000,500); 
-  
-  backgr = createSprite(500, 250); 
-  backgr.addImage(bg); 
-  
-  // mouseSprite = createSprite(0, 0, 50, 50); 
-  
-  playerSetup(); 
-  tileSetup(); 
-  
+  createCanvas(1024,768); 
   socket.onopen = openSocket;
   socket.onmessage = showData;
+  
+  frameRate(5); 
+  
+  for(var i = 0; i<3; i++){
+    for(var j = 0; j<3; j++){
+      var blocks = createSprite((width*.5-140)+ i*140, j*140+170, 140, 140); 
+      blocks.addImage("brick", brick); 
+      solids.push(blocks); 
+    }
+  }
+  
+  character = createSprite(width*.4, height*.6); 
+  character.addAnimation("resting", characterSpriteSheet); 
+  character.addAnimation("walking", walkingSpriteSheet); 
+  
+ 
+  
+  buttonVal[0] = 0; 
 }
 
 function draw() {
-  background(255); 
- 
+  image(backgroundImg, 0, 0, 1024, 768);  
+  // var i = buttonVal[9]; 
   
-  console.log(buttonVal[11]); 
+  // for(var i; i < 9; i++){
+  //   if(buttonVal[0] == i ){
+  //     console.log('this happened'); 
+  //     // var t = random(0,4); 
+  //     solids[i].remove();   
+  //   }
+  // }
+  if(state == 0){
+      
+      if(buttonVal[0] == 1){
+        solids[0].remove(); 
+      }else if(buttonVal[0] == 2){
+        solids[1].remove(); 
+      }else if(buttonVal[0] == 3){
+        solids[2].remove(); 
+      }else if(buttonVal[0] == 4){
+        solids[3].remove(); 
+      }else if(buttonVal[0] == 5){
+        solids[4].remove(); 
+      }else if(buttonVal[0] == 6){
+        solids[5].remove(); 
+      }else if(buttonVal[0] == 7){
+        solids[6].remove(); 
+      }else if(buttonVal[0] == 8){
+        solids[7].remove(); 
+      }else if(buttonVal[0] == 9){
+        solids[8].remove(); 
+        state = 1; 
+      }
+  }else if(state == 1){
+    character.changeAnimation("walking"); 
+    character.velocity.y = -10; 
+    character.velocity.x = 5; 
+    println(character.position.x); 
+    println(character.position.y); 
+    if(character.position.x >= 500 && character.position.y <= 300){
+      pageReload(); 
+      console.log("this happened"); 
+    }
+  }  
   
-  if(buttonVal[11]=== "4"){
-    solids[1].changeAnimation("starImage");
-  } else{
-    solids[1].changeAnimation("tileImage");
-  }
-  
-  if(buttonVal[10]=== "4"){
-    solids[0].changeAnimation("starImage");
-  } else{
-    solids[0].changeAnimation("tileImage");
-  }
-  
-  if(buttonVal[8]=== "4"){
-    solids[2].changeAnimation("starImage");
-  } else{
-    solids[2].changeAnimation("tileImage");
-  }
 
-  
+  console.log(buttonVal[0]); 
+  // console.log(previousButtonVal); 
   drawSprites(); 
-  tileUpdate(); 
 }
 
-function playerSetup(){
-  blobby_spriteSheet = loadSpriteSheet('assets/spritesheet.png', 93, 119, 5);
-  square_spriteSheet = loadSpriteSheet('assets/spritesheet2.png', 110.133, 112.19, 4);
-
-  walk2_animation = loadAnimation(square_spriteSheet);
-  walk_animation = loadAnimation(blobby_spriteSheet);
-  
-  blob = createSprite(blobStartX , blobStartY); 
-  blob.setCollider("circle", 0, 0, 50); 
-  blob.addAnimation("resting", "assets/blob.png"); 
-  blob.addAnimation("walking", blobby_spriteSheet); 
-}
 
 function openSocket() {
   console.log('socket is open');
@@ -83,6 +104,11 @@ function openSocket() {
 
 function showData(result) {
   buttonVal = trim(result.data); //clear the whitespace and assign it to buttonVal
-  // console.log(buttonVal); //printing out the button data
+  // console.log(buttonVal); //printing out the button data\
+  
+}
+
+function pageReload(){
+  location.reload(); 
 }
 
